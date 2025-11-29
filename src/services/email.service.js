@@ -55,9 +55,22 @@ If you did not create an account, then ignore this email.`;
   await sendEmail(to, subject, text);
 };
 
+/**
+ * Send OTP email
+ * @param {string} to
+ * @param {string} otp
+ * @returns {Promise}
+ */
+const sendOtpEmail = async (to, otp) => {
+  const subject = 'Your One-Time Password (OTP)';
+  const text = `Dear user,\nYour OTP is: ${otp}\nIt is valid for a short period. If you did not request this, please ignore this email.`;
+  await sendEmail(to, subject, text);
+};
+
 module.exports = {
   transport,
   sendEmail,
   sendResetPasswordEmail,
   sendVerificationEmail,
+  sendOtpEmail,
 };

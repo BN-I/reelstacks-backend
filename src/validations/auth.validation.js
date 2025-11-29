@@ -16,6 +16,16 @@ const login = {
   }),
 };
 
+const socialLogin = {
+  body: Joi.object().keys({
+    idToken: Joi.string().required(),
+    loginProvider: Joi.string().valid('google', 'facebook', 'apple').required(),
+    name: Joi.string().optional(),
+    email: Joi.string().email().optional(),
+    profilePicture: Joi.string().optional(),
+  }),
+};
+
 const logout = {
   body: Joi.object().keys({
     refreshToken: Joi.string().required(),
@@ -57,4 +67,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   verifyEmail,
+  socialLogin,
 };

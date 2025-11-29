@@ -44,6 +44,22 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    provider: {
+      type: String,
+      enum: ['local', 'google', 'facebook', 'apple'], // add more as needed
+      default: 'local',
+    },
+    providerId: {
+      type: String,
+      unique: true,
+      sparse: true, // allows multiple nulls for local users
+    },
+    profilePicture: {
+      type: String,
+    },
+    oauthTokens: {
+      type: Object, // or a more specific schema if needed
+    },
   },
   {
     timestamps: true,
