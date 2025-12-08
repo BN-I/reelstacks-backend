@@ -21,11 +21,6 @@ const getReel = catchAsync(async (req, res) => {
   res.send(reel);
 });
 
-const updateReel = catchAsync(async (req, res) => {
-  const reel = await reelService.updateReelById(req.params.reelId, req.body);
-  res.send(reel);
-});
-
 const deleteReel = catchAsync(async (req, res) => {
   await reelService.deleteReelById(req.params.reelId);
   res.status(httpStatus.NO_CONTENT).send();
@@ -35,6 +30,5 @@ module.exports = {
   createReel,
   getReels,
   getReel,
-  updateReel,
   deleteReel,
 };

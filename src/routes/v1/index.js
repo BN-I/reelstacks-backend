@@ -15,6 +15,14 @@ const defaultRoutes = [
     path: '/users',
     route: userRoute,
   },
+  {
+    path: '/reels',
+    route: require('./reel.route'),
+  },
+  {
+    path: '/folders',
+    route: require('./folder.route'),
+  },
 ];
 
 const devRoutes = [

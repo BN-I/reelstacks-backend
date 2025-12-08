@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 
 const reelSchema = mongoose.Schema(
   {
@@ -10,7 +10,6 @@ const reelSchema = mongoose.Schema(
     },
     image: {
       type: String,
-      required: true,
     },
     folder: {
       type: mongoose.SchemaTypes.ObjectId,
@@ -34,6 +33,7 @@ const reelSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 reelSchema.plugin(toJSON);
+reelSchema.plugin(paginate);
 
 /**
  * @typedef Token

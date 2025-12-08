@@ -12,33 +12,47 @@ const downloadImage = async (imageUrl) => {
     try {
       const protocol = imageUrl.startsWith('https') ? https : http;
 
-      const request = protocol.get(imageUrl, { timeout: 10000 }, (response) => {
-        const contentType = response.headers['content-type'] || 'image/jpeg';
+      const options = {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+          Accept: 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+          Referer: 'https://google.com',
+        },
+        timeout: 15000,
+      };
+
+      const req = protocol.get(imageUrl, options, (response) => {
+        const status = response.statusCode;
+
+        // Follow redirects
+        if ([301, 302, 303, 307, 308].includes(status)) {
+          return resolve(downloadImage(response.headers.location));
+        }
+
+        const contentType = response.headers['content-type'] || '';
+
+        if (!contentType.startsWith('image/')) {
+          return reject(new Error(`URL did not return an image. Type: ${contentType}`));
+        }
+
         const chunks = [];
-
-        response.on('data', (chunk) => {
-          chunks.push(chunk);
-        });
-
+        response.on('data', (chunk) => chunks.push(chunk));
         response.on('end', () => {
-          const buffer = Buffer.concat(chunks);
-          resolve({ buffer, contentType });
+          resolve({
+            buffer: Buffer.concat(chunks),
+            contentType,
+          });
         });
       });
 
-      request.on('error', (error) => {
-        logger.error(`Error downloading image from ${imageUrl}: ${error.message}`);
-        reject(error);
+      req.on('error', reject);
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error('Image download timeout'));
       });
-
-      request.on('timeout', () => {
-        request.abort();
-        logger.error(`Timeout downloading image from ${imageUrl}`);
-        reject(new Error('Request timeout'));
-      });
-    } catch (error) {
-      logger.error(`Error in downloadImage: ${error.message}`);
-      reject(error);
+    } catch (err) {
+      reject(err);
     }
   });
 };
@@ -54,7 +68,7 @@ const generateFileName = (originalUrl) => {
   const urlParts = originalUrl.split('/');
   const originalFileName = urlParts[urlParts.length - 1].split('?')[0] || 'image';
 
-  return `reels/${timestamp}-${randomString}-${originalFileName}`;
+  return `${timestamp}-${randomString}-${originalFileName}`;
 };
 
 module.exports = {

@@ -21,10 +21,12 @@ const uploadFile = async (fileKey, fileBuffer, contentType, metadata = {}) => {
   try {
     const params = {
       Bucket: config.aws.s3BucketName,
-      Key: fileKey,
+      Key: `test/${fileKey}`,
       Body: fileBuffer,
       ContentType: contentType,
       Metadata: metadata,
+      ACL: 'public-read',
+      // Removed ACL: 'public-read' - use backend to serve files instead
     };
 
     const result = await s3.upload(params).promise();

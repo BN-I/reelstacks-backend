@@ -32,10 +32,17 @@ const deleteFolder = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const getUserFolders = catchAsync(async (req, res) => {
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const result = await folderService.getUserFolders(req.user._id, options);
+  res.send(result);
+});
+
 module.exports = {
   createFolder,
   getFolders,
   getFolder,
   updateFolder,
   deleteFolder,
+  getUserFolders,
 };

@@ -12,36 +12,36 @@ const fetchOGMetaTags = async (url) => {
     try {
       const protocol = url.startsWith('https') ? https : http;
 
-      const request = protocol.get(url, { timeout: 10000 }, (response) => {
-        let htmlData = '';
+      const request = protocol.get(
+        url,
+        {
+          timeout: 10000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 5.1; rv:19.0) Gecko/20100101 Firefox/19.0',
+          },
+        },
+        (response) => {
+          let htmlData = '';
 
-        response.on('data', (chunk) => {
-          htmlData += chunk.toString();
+          response.on('data', (chunk) => {
+            console.log(chunk);
+            htmlData += chunk.toString();
+            // if (htmlData.length > 100000) request.abort();
+          });
 
-          // Stop reading after we have enough data (first 100KB usually contains meta tags)
-          if (htmlData.length > 100000) {
-            request.abort();
-          }
-        });
+          response.on('end', () => {
+            const metaTags = parseMetaTags(htmlData);
+            resolve(metaTags);
+          });
+        }
+      );
 
-        response.on('end', () => {
-          const metaTags = parseMetaTags(htmlData);
-          resolve(metaTags);
-        });
-      });
-
-      request.on('error', (error) => {
-        logger.error(`Error fetching OG meta tags from ${url}: ${error.message}`);
-        reject(error);
-      });
-
+      request.on('error', reject);
       request.on('timeout', () => {
         request.abort();
-        logger.error(`Timeout fetching OG meta tags from ${url}`);
         reject(new Error('Request timeout'));
       });
     } catch (error) {
-      logger.error(`Error in fetchOGMetaTags: ${error.message}`);
       reject(error);
     }
   });

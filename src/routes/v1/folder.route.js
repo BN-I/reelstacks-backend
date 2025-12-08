@@ -11,6 +11,8 @@ router
   .post(auth('manageFolders'), validate(folderValidation.createFolder), folderController.createFolder)
   .get(auth('getFolders'), validate(folderValidation.getFolders), folderController.getFolders);
 
+router.route('/me').get(auth('getFolders'), validate(folderValidation.getUserFolders), folderController.getUserFolders);
+
 router
   .route('/:folderId')
   .get(auth('getFolders'), validate(folderValidation.getFolder), folderController.getFolder)

@@ -14,7 +14,6 @@ router
 router
   .route('/:reelId')
   .get(auth('getReels'), validate(reelValidation.getReel), reelController.getReel)
-  .patch(auth('manageReels'), validate(reelValidation.updateReel), reelController.updateReel)
   .delete(auth('manageReels'), validate(reelValidation.deleteReel), reelController.deleteReel);
 
 module.exports = router;

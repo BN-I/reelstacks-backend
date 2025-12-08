@@ -42,10 +42,23 @@ const deleteFolderById = async (folderId) => {
   return folder;
 };
 
+/**
+ * Get all folders for a user
+ * @param {string} userId
+ * @param {Object} options
+ * @returns {Promise<Array>}
+ */
+const getUserFolders = async (userId, options = {}) => {
+  const filter = { user: userId };
+  const folders = await Folder.paginate(filter, options);
+  return folders;
+};
+
 module.exports = {
   createFolder,
   queryFolders,
   getFolderById,
   updateFolderById,
   deleteFolderById,
+  getUserFolders,
 };
