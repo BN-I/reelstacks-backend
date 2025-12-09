@@ -100,10 +100,7 @@ const createReel = async (reelBody) => {
 };
 
 const queryReels = async (filter, options) => {
-  options.populate = {
-    path: 'folder',
-    select: 'name createdAt', // only these fields
-  };
+  options.populate = 'folder';
   const reels = await Reel.paginate(filter, options);
   return reels;
 };
