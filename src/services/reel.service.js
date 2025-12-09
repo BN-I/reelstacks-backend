@@ -42,6 +42,14 @@ const createReel = async (reelBody) => {
         description: xMeta.data.author_name,
         image: `https://pbs.twimg.com/profile_images/1683497657388392455/yW7azZHt_400x400.jpg`,
       };
+    } else if (url.includes('facebook.com')) {
+      meta = {
+        url: url,
+        folder: reelBody.folder,
+        title: 'Untitled',
+        description: '',
+        image: 'https://www.facebook.com/images/fb_icon_325x325.png',
+      };
     } else {
       // Fetch OG meta tags from the URL
       const ogTags = await fetchOGMetaTags(url);
