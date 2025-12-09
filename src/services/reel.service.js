@@ -79,7 +79,7 @@ const createReel = async (reelBody) => {
       folder: reelBody.folder,
       title: meta.title || 'Untitled',
       description: meta.description || '',
-      image: meta.imageUrl, // Use the S3 URL
+      image: meta.image, // Use the S3 URL
     };
 
     return Reel.create(reelMeta);
