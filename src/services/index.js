@@ -6,3 +6,4 @@ module.exports.firebaseService = require('./firebase.service');
 module.exports.folderService = require('./folder.service');
 module.exports.reelService = require('./reel.service');
 module.exports.s3Service = require('./s3.service');
+module.exports.categoryService = require('./category.service');

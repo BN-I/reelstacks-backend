@@ -11,12 +11,62 @@ router
   .post(auth('manageReels'), validate(reelValidation.createReel), reelController.createReel)
   .get(auth('getReels'), validate(reelValidation.getReels), reelController.getReels);
 
+// Route to delete many reels belonging to the user
+router.delete('/delete-many', auth('manageReels'), validate(reelValidation.deleteManyReels), reelController.deleteManyReels);
+
 router
   .route('/:reelId')
   .get(auth('getReels'), validate(reelValidation.getReel), reelController.getReel)
   .delete(auth('manageReels'), validate(reelValidation.deleteReel), reelController.deleteReel);
 
+router
+  .route('/folder/:folderId')
+  .get(auth('getReels'), validate(reelValidation.getReelsByFolder), reelController.getReelsByFolder);
+
 module.exports = router;
+
+/**
+ * @swagger
+ * /reels/delete-many:
+ *   post:
+ *     summary: Delete many reels
+ *     description: Delete multiple reels belonging to the authenticated user.
+ *     tags: [Reels]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - reelIds
+ *             properties:
+ *               reelIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of reel IDs to delete
+ *             example:
+ *               reelIds: ["60d0fe4f5311236168a109ca", "60d0fe4f5311236168a109cb"]
+ *     responses:
+ *       "200":
+ *         description: Successfully deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 deletedCount:
+ *                   type: integer
+ *       "400":
+ *         $ref: '#/components/responses/BadRequest'
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ */
 
 /**
  * @swagger

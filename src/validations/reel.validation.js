@@ -24,6 +24,18 @@ const getReel = {
   }),
 };
 
+const getReelsByFolder = {
+  params: Joi.object().keys({
+    folderId: Joi.string().custom(objectId),
+  }),
+  query: Joi.object().keys({
+    title: Joi.string(),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+  }),
+};
+
 const updateReel = {
   params: Joi.object().keys({
     reelId: Joi.string().required().custom(objectId),
@@ -42,10 +54,18 @@ const deleteReel = {
   }),
 };
 
+const deleteManyReels = {
+  body: Joi.object().keys({
+    reelIds: Joi.array().items(Joi.string().custom(objectId)).min(1).required(),
+  }),
+};
+
 module.exports = {
   createReel,
   getReels,
   getReel,
   updateReel,
   deleteReel,
+  getReelsByFolder,
+  deleteManyReels,
 };

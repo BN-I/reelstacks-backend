@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const pick = require('../utils/pick');
 const catchAsync = require('../utils/catchAsync');
-const { folderService } = require('../services');
+const { folderService, reelService } = require('../services');
 
 const createFolder = catchAsync(async (req, res) => {
   const body = Object.assign({}, req.body);
@@ -13,6 +13,13 @@ const createFolder = catchAsync(async (req, res) => {
 const getFolders = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['name']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+  if (filter.name) {
+    filter.name = {
+      $regex: filter.name,
+      $options: 'i', // case-insensitive
+    };
+  }
   const result = await folderService.queryFolders(filter, options);
   res.send(result);
 });
@@ -33,8 +40,32 @@ const deleteFolder = catchAsync(async (req, res) => {
 });
 
 const getUserFolders = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['name']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await folderService.getUserFolders(req.user._id, options);
+  console.log(req.query);
+  if (filter.name) {
+    filter.name = {
+      $regex: filter.name,
+      $options: 'i', // case-insensitive
+    };
+  }
+
+  if (req.user) {
+    filter.user = req.user._id;
+  }
+
+  const result = await folderService.getUserFolders(filter, options);
+
+  const folders = result.results.map(async (folder) => {
+    const reel = await reelService.queryReels({ folder: folder._id }, { limit: 4 });
+    return {
+      ...folder.toJSON(),
+      thumbnails: reel.results.map((r) => r.image) || null,
+      count: reel.totalResults,
+    };
+  });
+
+  result.results = await Promise.all(folders);
   res.send(result);
 });
 

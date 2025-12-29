@@ -16,6 +16,11 @@ const reelSchema = mongoose.Schema(
       ref: 'Folder',
       required: true,
     },
+    user: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -38,6 +43,6 @@ reelSchema.plugin(paginate);
 /**
  * @typedef Token
  */
-const Reel = mongoose.model('reelSchema', reelSchema);
+const Reel = mongoose.model('reel', reelSchema);
 
 module.exports = Reel;

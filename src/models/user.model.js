@@ -60,6 +60,10 @@ const userSchema = mongoose.Schema(
     oauthTokens: {
       type: Object, // or a more specific schema if needed
     },
+    OnBoardingCompleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

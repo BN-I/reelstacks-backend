@@ -7,8 +7,9 @@ const { fetchOGMetaTags } = require('../utils/ogMetaTags');
 const { downloadImage, generateFileName } = require('../utils/imageDownloader');
 const { default: axios } = require('axios');
 const https = require('https');
+const { decodeUrl } = require('../../tests/utils/common');
 
-const createReel = async (reelBody) => {
+const createReel = async (reelBody, user) => {
   try {
     console.log('Creating reel with body:', reelBody);
     let meta = {};
@@ -59,7 +60,7 @@ const createReel = async (reelBody) => {
       let imageUrl = '';
 
       try {
-        const { buffer, contentType } = await downloadImage(ogTags.image);
+        const { buffer, contentType } = await downloadImage(decodeUrl(ogTags.image) || ogTags.image);
         const fileName = generateFileName(ogTags.image);
 
         // Upload image to S3
@@ -81,10 +82,10 @@ const createReel = async (reelBody) => {
         image: imageUrl, // Use the S3 URL
       };
     }
-
     const reelMeta = {
       url: url,
       folder: reelBody.folder,
+      user: user._id,
       title: meta.title || 'Untitled',
       description: meta.description || '',
       image: meta.image, // Use the S3 URL
@@ -118,9 +119,21 @@ const deleteReelById = async (reelId) => {
   return reel;
 };
 
+/**
+ * Delete multiple reels by IDs, only if they belong to the user
+ * @param {string[]} reelIds
+ * @param {string} userId
+ * @returns {Promise<number>} Number of deleted reels
+ */
+const deleteManyReelsByUser = async (reelIds, userId) => {
+  const { deletedCount } = await Reel.deleteMany({ _id: { $in: reelIds }, user: userId });
+  return deletedCount;
+};
+
 module.exports = {
   createReel,
   queryReels,
   getReelById,
   deleteReelById,
+  deleteManyReelsByUser,
 };

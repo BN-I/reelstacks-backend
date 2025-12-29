@@ -23,6 +23,10 @@ const defaultRoutes = [
     path: '/folders',
     route: require('./folder.route'),
   },
+  {
+    path: '/categories',
+    route: require('./category.route'),
+  },
 ];
 
 const devRoutes = [

@@ -24,7 +24,8 @@
     "docker:prod": "docker-compose -f docker-compose.yml -f docker-compose.prod.yml up",
     "docker:dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up",
     "docker:test": "docker-compose -f docker-compose.yml -f docker-compose.test.yml up",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "createUser": "cross-env NODE_ENV=development node seeder/createUser/index.js"
   },
   "keywords": [
     "node",
@@ -60,6 +61,7 @@
     "express-mongo-sanitize": "^2.0.0",
     "express-rate-limit": "^5.0.0",
     "firebase-admin": "^13.5.0",
+    "generate-password": "^1.7.1",
     "helmet": "^4.1.0",
     "http-status": "^1.4.0",
     "joi": "^17.3.0",

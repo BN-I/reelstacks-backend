@@ -48,8 +48,7 @@ const deleteFolderById = async (folderId) => {
  * @param {Object} options
  * @returns {Promise<Array>}
  */
-const getUserFolders = async (userId, options = {}) => {
-  const filter = { user: userId };
+const getUserFolders = async (filter = {}, options = {}) => {
   const folders = await Folder.paginate(filter, options);
   return folders;
 };

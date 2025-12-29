@@ -34,10 +34,16 @@ const deleteUser = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const updateOnBoardingCompleted = catchAsync(async (req, res) => {
+  console.log(req.user.id);
+  const user = await userService.updateUserById(req.user.id, { OnBoardingCompleted: true });
+  res.send(user);
+});
 module.exports = {
   createUser,
   getUsers,
   getUser,
   updateUser,
   deleteUser,
+  updateOnBoardingCompleted,
 };
