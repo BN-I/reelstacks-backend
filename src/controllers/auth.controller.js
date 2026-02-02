@@ -7,7 +7,6 @@ const { firebaseService } = require('../services');
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
-  const tokens = await tokenService.generateAuthTokens(user);
 
   // Generate OTP, store in Redis, and send via email
 
@@ -15,8 +14,21 @@ const register = catchAsync(async (req, res) => {
   const otpKey = `otp:${user.email}`;
   await redisClient.setEx(otpKey, 600, otp); // 600 seconds = 10 minutes
   await emailService.sendOtpEmail(user.email, otp);
-  res.status(httpStatus.CREATED).send({ user, tokens });
+  res.status(httpStatus.CREATED).send({ user });
   // Verify OTP controller using Redis
+});
+
+const sendOtp = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  const user = await userService.getUserByEmail(email);
+  if (!user) {
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'User not found' });
+  }
+  const otp = generateOTP();
+  const otpKey = `otp:${email}`;
+  await redisClient.setEx(otpKey, 600, otp); // 600 seconds = 10 minutes
+  await emailService.sendOtpEmail(email, otp);
+  res.status(httpStatus.OK).send({ message: 'OTP sent successfully' });
 });
 
 const verifyOtp = catchAsync(async (req, res) => {
@@ -37,12 +49,21 @@ const verifyOtp = catchAsync(async (req, res) => {
     user.isEmailVerified = true;
     await user.save();
   }
-  res.status(httpStatus.OK).send({ message: 'OTP verified successfully' });
+
+  const tokens = await tokenService.generateAuthTokens(user);
+  res.status(httpStatus.OK).send({ message: 'OTP verified successfully', tokens, user });
 });
 
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const user = await authService.loginUserWithEmailAndPassword(email, password);
+  if (!user.isEmailVerified) {
+    const otp = generateOTP();
+    const otpKey = `otp:${user.email}`;
+    await redisClient.setEx(otpKey, 600, otp); // 600 seconds = 10 minutes
+    await emailService.sendOtpEmail(user.email, otp);
+    res.send({ user });
+  }
   const tokens = await tokenService.generateAuthTokens(user);
   res.send({ user, tokens });
 });
@@ -159,5 +180,6 @@ module.exports = {
   sendVerificationEmail,
   verifyEmail,
   verifyOtp,
+  sendOtp,
   socialLogin,
 };
