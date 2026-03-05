@@ -18,6 +18,16 @@ const getReels = {
   }),
 };
 
+const getAllReels = {
+  query: Joi.object().keys({
+    title: Joi.string(),
+    folder: Joi.string().custom(objectId),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+  }),
+};
+
 const getReel = {
   params: Joi.object().keys({
     reelId: Joi.string().custom(objectId),

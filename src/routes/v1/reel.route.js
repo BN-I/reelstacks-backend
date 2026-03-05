@@ -14,6 +14,8 @@ router
 // Route to delete many reels belonging to the user
 router.delete('/delete-many', auth('manageReels'), validate(reelValidation.deleteManyReels), reelController.deleteManyReels);
 
+router.route('/all').get(auth('getAllReels'), validate(reelValidation.getAllReels), reelController.getAllReels);
+
 router
   .route('/:reelId')
   .get(auth('getReels'), validate(reelValidation.getReel), reelController.getReel)

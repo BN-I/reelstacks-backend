@@ -1,10 +1,11 @@
 const allRoles = {
-  user: ['getCategories', 'getReels', 'manageReels', 'getFolders', 'manageFolders', 'onBoardingCompleted'],
+  user: ['getCategories', 'getReels', 'manageReels', 'getMyFolders', 'manageFolders', 'onBoardingCompleted'],
   admin: [
     'getUsers',
     'manageUsers',
     'getCategories',
     'manageCategories',
+    'getAllReels',
     'getReels',
     'manageReels',
     'getFolders',

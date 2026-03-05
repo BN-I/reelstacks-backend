@@ -10,6 +10,21 @@ const createReel = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).send(reel);
 });
 
+const getAllReels = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['title', 'folder']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+  if (filter.title) {
+    filter.title = {
+      $regex: filter.title,
+      $options: 'i', // case-insensitive
+    };
+  }
+
+  const result = await reelService.queryReels(filter, options);
+  res.send(result);
+});
+
 const getReels = catchAsync(async (req, res) => {
   const user = req.user;
   const filter = pick(req.query, ['title', 'folder']);
@@ -81,4 +96,5 @@ module.exports = {
   deleteReel,
   getReelsByFolder,
   deleteManyReels,
+  getAllReels,
 };
