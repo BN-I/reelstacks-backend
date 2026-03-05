@@ -101,13 +101,13 @@ const createReel = async (reelBody, user) => {
 };
 
 const queryReels = async (filter, options) => {
-  options.populate = 'folder';
+  options.populate = 'folder user';
   const reels = await Reel.paginate(filter, options);
   return reels;
 };
 
 const getReelById = async (id) => {
-  return Reel.findById(id);
+  return Reel.findById(id).populate('folder user');
 };
 
 const deleteReelById = async (reelId) => {

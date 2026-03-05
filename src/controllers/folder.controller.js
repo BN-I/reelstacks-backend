@@ -20,6 +20,9 @@ const getFolders = catchAsync(async (req, res) => {
       $options: 'i', // case-insensitive
     };
   }
+
+  options.populate = 'user';
+
   const result = await folderService.queryFolders(filter, options);
   res.send(result);
 });
