@@ -11,7 +11,7 @@ const createFolder = catchAsync(async (req, res) => {
 });
 
 const getFolders = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['name']);
+  const filter = pick(req.query, ['name', 'user']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
   if (filter.name) {

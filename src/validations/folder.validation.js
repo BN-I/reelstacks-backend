@@ -10,6 +10,7 @@ const createFolder = {
 
 const getFolders = {
   query: Joi.object().keys({
+    user: Joi.string().custom(objectId),
     name: Joi.string(),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),

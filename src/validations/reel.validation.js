@@ -20,6 +20,7 @@ const getReels = {
 
 const getAllReels = {
   query: Joi.object().keys({
+    user: Joi.string().custom(objectId),
     title: Joi.string(),
     folder: Joi.string().custom(objectId),
     sortBy: Joi.string(),
@@ -78,4 +79,5 @@ module.exports = {
   deleteReel,
   getReelsByFolder,
   deleteManyReels,
+  getAllReels,
 };

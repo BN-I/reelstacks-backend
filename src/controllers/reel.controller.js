@@ -11,7 +11,7 @@ const createReel = catchAsync(async (req, res) => {
 });
 
 const getAllReels = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['title', 'folder']);
+  const filter = pick(req.query, ['title', 'folder', 'user']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
   if (filter.title) {
