@@ -9,6 +9,7 @@ const allRoles = {
     'manageReels',
     'getFolders',
     'manageFolders',
+    'getAnalytics',
   ],
 };
 

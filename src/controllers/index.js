@@ -3,3 +3,4 @@ module.exports.userController = require('./user.controller');
 module.exports.folderController = require('./folder.controller');
 module.exports.reelController = require('./reel.controller');
 module.exports.categoryController = require('./category.controller');
+module.exports.analyticsController = require('./analytics.controller');

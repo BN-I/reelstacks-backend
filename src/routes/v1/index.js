@@ -39,6 +39,10 @@ const defaultRoutes = [
     path: '/categories',
     route: require('./category.route'),
   },
+  {
+    path: '/analytics',
+    route: require('./analytics.route'),
+  },
 ];
 
 const devRoutes = [
