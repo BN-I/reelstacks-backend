@@ -43,14 +43,6 @@ const createReel = async (reelBody, user) => {
         description: xMeta.data.author_name,
         image: `https://pbs.twimg.com/profile_images/1683497657388392455/yW7azZHt_400x400.jpg`,
       };
-    } else if (url.includes('facebook.com')) {
-      meta = {
-        url: url,
-        folder: reelBody.folder,
-        title: 'Untitled',
-        description: '',
-        image: 'https://www.facebook.com/images/fb_icon_325x325.png',
-      };
     } else {
       // Fetch OG meta tags from the URL
       const ogTags = await fetchOGMetaTags(url);
@@ -60,12 +52,12 @@ const createReel = async (reelBody, user) => {
       let imageUrl = '';
 
       try {
-        const { buffer, contentType } = await downloadImage(decodeUrl(ogTags.image) || ogTags.image);
-        const fileName = generateFileName(ogTags.image);
+        const { buffer, contentType } = await downloadImage(decodeUrl(ogTags.thumbnail) || ogTags.thumbnail);
+        const fileName = generateFileName(ogTags.thumbnail);
 
         // Upload image to S3
         const uploadResult = await s3Service.uploadFile(fileName, buffer, contentType, {
-          originalUrl: ogTags.image,
+          originalUrl: ogTags.thumbnail,
         });
 
         imageUrl = uploadResult.url;

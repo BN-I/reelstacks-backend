@@ -1,50 +1,47 @@
 const https = require('https');
 const http = require('http');
 const logger = require('../config/logger');
+const cheerio = require('cheerio');
+const puppeteer = require('puppeteer');
 
 /**
  * Fetch Open Graph meta tags from a URL
  * @param {string} url - The URL to fetch meta tags from
  * @returns {Promise<Object>} - Returns an object with title, description, and image
  */
-const fetchOGMetaTags = async (url) => {
-  return new Promise((resolve, reject) => {
-    try {
-      const protocol = url.startsWith('https') ? https : http;
-
-      const request = protocol.get(
-        url,
-        {
-          timeout: 10000,
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 5.1; rv:19.0) Gecko/20100101 Firefox/19.0',
-          },
-        },
-        (response) => {
-          let htmlData = '';
-
-          response.on('data', (chunk) => {
-            console.log(chunk);
-            htmlData += chunk.toString();
-            // if (htmlData.length > 100000) request.abort();
-          });
-
-          response.on('end', () => {
-            const metaTags = parseMetaTags(htmlData);
-            resolve(metaTags);
-          });
-        }
-      );
-
-      request.on('error', reject);
-      request.on('timeout', () => {
-        request.abort();
-        reject(new Error('Request timeout'));
-      });
-    } catch (error) {
-      reject(error);
-    }
+const fetchOGMetaTags = async (reelUrl) => {
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
+
+  try {
+    const page = await browser.newPage();
+
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    );
+
+    await page.goto(reelUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
+
+    const meta = await page.evaluate(() => {
+      console.log(document);
+      const get = (sel) => document.querySelector(sel)?.getAttribute('content');
+      return {
+        thumbnail: get('meta[property="og:image"]') || get('meta[property="og:image:url"]'),
+        title: get('meta[property="og:title"]'),
+        description: get('meta[property="og:description"]'),
+      };
+    });
+
+    if (!meta.thumbnail) {
+      throw new Error('Thumbnail not found — Reel may be private or restricted');
+    }
+
+    return meta;
+  } finally {
+    await browser.close();
+  }
 };
 
 /**
