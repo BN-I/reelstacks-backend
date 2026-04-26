@@ -9,6 +9,8 @@ const { default: axios } = require('axios');
 const https = require('https');
 const { decodeUrl } = require('../../tests/utils/common');
 
+const FALLBACK_IMAGE = 'https://reelstacks-thumbnails.s3.us-east-1.amazonaws.com/test/dummy.webp';
+
 const createReel = async (reelBody, user) => {
   try {
     console.log('Creating reel with body:', reelBody);
@@ -24,16 +26,16 @@ const createReel = async (reelBody, user) => {
         description: tiktokMeta.data.author_name,
         image: tiktokMeta.data.thumbnail_url,
       };
-    } else if (url.includes('youtube.com')) {
-      const youtubeMeta = await axios.get(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}`);
-      console.log('Youtube Meta:', youtubeMeta.data);
-      meta = {
-        url: url,
-        folder: reelBody.folder,
-        title: youtubeMeta.data.title,
-        description: youtubeMeta.data.author_name,
-        image: youtubeMeta.data.thumbnail_url,
-      };
+      // } else if (url.includes('youtube.com')) {
+      //   const youtubeMeta = await axios.get(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}`);
+      //   console.log('Youtube Meta:', youtubeMeta.data);
+      //   meta = {
+      //     url: url,
+      //     folder: reelBody.folder,
+      //     title: youtubeMeta.data.title,
+      //     description: youtubeMeta.data.author_name,
+      //     image: youtubeMeta.data.thumbnail_url,
+      //   };
     } else if (url.includes('x.com')) {
       const xMeta = await axios.get(`https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}`);
       meta = {
@@ -49,7 +51,7 @@ const createReel = async (reelBody, user) => {
       console.log('Fetched OG Tags:', ogTags);
 
       // Download and upload image to S3 if available
-      let imageUrl = '';
+      let imageUrl = FALLBACK_IMAGE;
 
       try {
         const { buffer, contentType } = await downloadImage(decodeUrl(ogTags.thumbnail) || ogTags.thumbnail);
@@ -80,7 +82,7 @@ const createReel = async (reelBody, user) => {
       user: user._id,
       title: meta.title || 'Untitled',
       description: meta.description || '',
-      image: meta.image, // Use the S3 URL
+      image: meta.image || FALLBACK_IMAGE,
     };
 
     return Reel.create(reelMeta);
