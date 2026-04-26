@@ -12,7 +12,7 @@ const puppeteer = require('puppeteer');
 const fetchOGMetaTags = async (reelUrl) => {
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 
   try {
@@ -22,28 +22,10 @@ const fetchOGMetaTags = async (reelUrl) => {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     );
 
-    // Block unnecessary resources to speed things up
-    await page.setRequestInterception(true);
-    page.on('request', (req) => {
-      const type = req.resourceType();
-      if (['image', 'stylesheet', 'font', 'media'].includes(type)) {
-        req.abort();
-      } else {
-        req.continue();
-      }
-    });
-
-    // Use 'networkidle2' instead of 'domcontentloaded' — waits for redirects to settle
-    await page.goto(reelUrl, { waitUntil: 'networkidle2', timeout: 30000 });
-
-    // Wait for at least one OG meta tag to appear in the DOM
-    await page
-      .waitForSelector('meta[property="og:image"], meta[property="og:title"]', {
-        timeout: 10000,
-      })
-      .catch(() => null); // don't throw if not found, handle below
+    await page.goto(reelUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
 
     const meta = await page.evaluate(() => {
+      console.log(document);
       const get = (sel) => document.querySelector(sel)?.getAttribute('content');
       return {
         thumbnail: get('meta[property="og:image"]') || get('meta[property="og:image:url"]'),
@@ -51,6 +33,10 @@ const fetchOGMetaTags = async (reelUrl) => {
         description: get('meta[property="og:description"]'),
       };
     });
+
+    if (!meta.thumbnail) {
+      throw new Error('Thumbnail not found — Reel may be private or restricted');
+    }
 
     return meta;
   } finally {
