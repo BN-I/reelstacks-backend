@@ -11,6 +11,37 @@ const { decodeUrl } = require('../../tests/utils/common');
 
 const FALLBACK_IMAGE = 'https://reelstacks-thumbnails.s3.us-east-1.amazonaws.com/test/dummy.webp';
 
+const fetchMetaWithPuppeteer = async (url, folder) => {
+  let ogTags = {};
+  try {
+    ogTags = await fetchOGMetaTags(url);
+  } catch (err) {
+    logger.warn(`Puppeteer OG fetch failed for ${url}: ${err.message}`);
+  }
+
+  let imageUrl = FALLBACK_IMAGE;
+  if (ogTags.thumbnail) {
+    try {
+      const { buffer, contentType } = await downloadImage(decodeUrl(ogTags.thumbnail) || ogTags.thumbnail);
+      const fileName = generateFileName(ogTags.thumbnail);
+      const uploadResult = await s3Service.uploadFile(fileName, buffer, contentType, {
+        originalUrl: ogTags.thumbnail,
+      });
+      imageUrl = uploadResult.url;
+    } catch (imageError) {
+      logger.warn(`Failed to process and upload image: ${imageError.message}`);
+    }
+  }
+
+  return {
+    url,
+    folder,
+    title: ogTags.title || 'Untitled',
+    description: ogTags.description || '',
+    image: imageUrl,
+  };
+};
+
 const createReel = async (reelBody, user) => {
   try {
     console.log('Creating reel with body:', reelBody);
@@ -18,63 +49,49 @@ const createReel = async (reelBody, user) => {
     const url = reelBody.url;
 
     if (url.includes('tiktok.com')) {
-      const tiktokMeta = await axios.get(`https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`);
-      meta = {
-        url: url,
-        folder: reelBody.folder,
-        title: tiktokMeta.data.title,
-        description: tiktokMeta.data.author_name,
-        image: tiktokMeta.data.thumbnail_url,
-      };
-      // } else if (url.includes('youtube.com')) {
-      //   const youtubeMeta = await axios.get(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}`);
-      //   console.log('Youtube Meta:', youtubeMeta.data);
-      //   meta = {
-      //     url: url,
-      //     folder: reelBody.folder,
-      //     title: youtubeMeta.data.title,
-      //     description: youtubeMeta.data.author_name,
-      //     image: youtubeMeta.data.thumbnail_url,
-      //   };
-    } else if (url.includes('x.com')) {
-      const xMeta = await axios.get(`https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}`);
-      meta = {
-        url: url,
-        folder: reelBody.folder,
-        title: xMeta.data.html,
-        description: xMeta.data.author_name,
-        image: `https://pbs.twimg.com/profile_images/1683497657388392455/yW7azZHt_400x400.jpg`,
-      };
-    } else {
-      // Fetch OG meta tags from the URL
-      const ogTags = await fetchOGMetaTags(url);
-      console.log('Fetched OG Tags:', ogTags);
-
-      // Download and upload image to S3 if available
-      let imageUrl = FALLBACK_IMAGE;
-
       try {
-        const { buffer, contentType } = await downloadImage(decodeUrl(ogTags.thumbnail) || ogTags.thumbnail);
-        const fileName = generateFileName(ogTags.thumbnail);
-
-        // Upload image to S3
-        const uploadResult = await s3Service.uploadFile(fileName, buffer, contentType, {
-          originalUrl: ogTags.thumbnail,
-        });
-
-        imageUrl = uploadResult.url;
-      } catch (imageError) {
-        logger.warn(`Failed to process and upload image: ${imageError.message}`);
+        const tiktokMeta = await axios.get(`https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`);
+        meta = {
+          url,
+          folder: reelBody.folder,
+          title: tiktokMeta.data.title,
+          description: tiktokMeta.data.author_name,
+          image: tiktokMeta.data.thumbnail_url,
+        };
+      } catch (oembedErr) {
+        logger.warn(`TikTok oembed failed, falling back to Puppeteer: ${oembedErr.message}`);
+        meta = await fetchMetaWithPuppeteer(url, reelBody.folder);
       }
-
-      // Create the reel with fetched data
-      meta = {
-        url: url,
-        folder: reelBody.folder,
-        title: ogTags.title || 'Untitled',
-        description: ogTags.description || '',
-        image: imageUrl, // Use the S3 URL
-      };
+    } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      try {
+        const youtubeMeta = await axios.get(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}`);
+        meta = {
+          url,
+          folder: reelBody.folder,
+          title: youtubeMeta.data.title,
+          description: youtubeMeta.data.author_name,
+          image: youtubeMeta.data.thumbnail_url,
+        };
+      } catch (oembedErr) {
+        logger.warn(`YouTube oembed failed, falling back to Puppeteer: ${oembedErr.message}`);
+        meta = await fetchMetaWithPuppeteer(url, reelBody.folder);
+      }
+    } else if (url.includes('x.com')) {
+      try {
+        const xMeta = await axios.get(`https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}`);
+        meta = {
+          url,
+          folder: reelBody.folder,
+          title: xMeta.data.html,
+          description: xMeta.data.author_name,
+          image: `https://pbs.twimg.com/profile_images/1683497657388392455/yW7azZHt_400x400.jpg`,
+        };
+      } catch (oembedErr) {
+        logger.warn(`X oembed failed, falling back to Puppeteer: ${oembedErr.message}`);
+        meta = await fetchMetaWithPuppeteer(url, reelBody.folder);
+      }
+    } else {
+      meta = await fetchMetaWithPuppeteer(url, reelBody.folder);
     }
     const reelMeta = {
       url: url,
