@@ -53,6 +53,10 @@ const getUserFolders = async (filter = {}, options = {}) => {
   return folders;
 };
 
+const getAllUserFolders = async (filter = {}) => {
+  return Folder.find(filter).select('id name user').sort({ createdAt: -1 });
+};
+
 module.exports = {
   createFolder,
   queryFolders,
@@ -60,4 +64,5 @@ module.exports = {
   updateFolderById,
   deleteFolderById,
   getUserFolders,
+  getAllUserFolders,
 };

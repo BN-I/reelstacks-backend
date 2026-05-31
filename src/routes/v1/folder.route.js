@@ -12,6 +12,7 @@ router
   .get(auth('getFolders'), validate(folderValidation.getFolders), folderController.getFolders);
 
 router.route('/me').get(auth('getMyFolders'), validate(folderValidation.getUserFolders), folderController.getUserFolders);
+router.route('/me/all').get(auth('getMyFolders'), folderController.getAllUserFolders);
 
 router
   .route('/:folderId')

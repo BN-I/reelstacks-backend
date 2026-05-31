@@ -52,6 +52,7 @@ const getReel = catchAsync(async (req, res) => {
 const getReelsByFolder = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['title']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  if (!options.sortBy) options.sortBy = 'createdAt:desc';
 
   if (filter.title) {
     filter.title = {

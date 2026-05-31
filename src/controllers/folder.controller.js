@@ -38,6 +38,7 @@ const updateFolder = catchAsync(async (req, res) => {
 });
 
 const deleteFolder = catchAsync(async (req, res) => {
+  await reelService.deleteReelsByFolder(req.params.folderId);
   await folderService.deleteFolderById(req.params.folderId);
   res.status(httpStatus.NO_CONTENT).send();
 });
@@ -45,6 +46,7 @@ const deleteFolder = catchAsync(async (req, res) => {
 const getUserFolders = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['name']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  if (!options.sortBy) options.sortBy = 'createdAt:desc';
   console.log(req.query);
   if (filter.name) {
     filter.name = {
@@ -72,6 +74,12 @@ const getUserFolders = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const getAllUserFolders = catchAsync(async (req, res) => {
+  const filter = { user: req.user._id };
+  const folders = await folderService.getAllUserFolders(filter);
+  res.send(folders);
+});
+
 module.exports = {
   createFolder,
   getFolders,
@@ -79,4 +87,5 @@ module.exports = {
   updateFolder,
   deleteFolder,
   getUserFolders,
+  getAllUserFolders,
 };

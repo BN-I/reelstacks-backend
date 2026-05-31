@@ -141,10 +141,16 @@ const deleteManyReelsByUser = async (reelIds, userId) => {
   return deletedCount;
 };
 
+const deleteReelsByFolder = async (folderId) => {
+  const { deletedCount } = await Reel.deleteMany({ folder: folderId });
+  return deletedCount;
+};
+
 module.exports = {
   createReel,
   queryReels,
   getReelById,
   deleteReelById,
   deleteManyReelsByUser,
+  deleteReelsByFolder,
 };
