@@ -89,6 +89,26 @@ const resetPassword = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const resetPasswordWithOtp = catchAsync(async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+  console.log('Reset password with OTP:', { email, otp, newPassword });
+  const user = await userService.getUserByEmail(email);
+  if (!user) {
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'User not found' });
+  }
+  const otpKey = `otp:${email}`;
+  const storedOtp = await redisClient.get(otpKey);
+  if (!storedOtp) {
+    return res.status(httpStatus.BAD_REQUEST).send({ message: 'OTP expired or not found' });
+  }
+  if (storedOtp !== otp) {
+    return res.status(httpStatus.BAD_REQUEST).send({ message: 'Invalid OTP' });
+  }
+  await redisClient.del(otpKey);
+  await userService.updateUserById(user.id, { password: newPassword });
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
 const sendVerificationEmail = catchAsync(async (req, res) => {
   const verifyEmailToken = await tokenService.generateVerifyEmailToken(req.user);
   await emailService.sendVerificationEmail(req.user.email, verifyEmailToken);
@@ -181,5 +201,6 @@ module.exports = {
   verifyEmail,
   verifyOtp,
   sendOtp,
+  resetPasswordWithOtp,
   socialLogin,
 };

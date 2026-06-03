@@ -59,6 +59,14 @@ const verifyEmail = {
   }),
 };
 
+const resetPasswordWithOtp = {
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    otp: Joi.string().required(),
+    newPassword: Joi.string().required().custom(password),
+  }),
+};
+
 module.exports = {
   register,
   login,
@@ -66,6 +74,7 @@ module.exports = {
   refreshTokens,
   forgotPassword,
   resetPassword,
+  resetPasswordWithOtp,
   verifyEmail,
   socialLogin,
 };

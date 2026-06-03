@@ -15,6 +15,7 @@ router.post('/reset-password', validate(authValidation.resetPassword), authContr
 
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
 router.post('/send-otp', validate(authValidation.sendOtp), authController.sendOtp);
+router.post('/reset-password-otp', validate(authValidation.resetPasswordWithOtp), authController.resetPasswordWithOtp);
 router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
 router.post('/verify-otp', authController.verifyOtp);
 router.post('/social-login', validate(authValidation.socialLogin), authController.socialLogin);
