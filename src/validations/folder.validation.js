@@ -42,12 +42,27 @@ const deleteFolder = {
   }),
 };
 
+const reorderFolders = {
+  body: Joi.object().keys({
+    folderIds: Joi.array().items(Joi.string().custom(objectId)).required(),
+  }),
+};
+
 const getUserFolders = {
   query: Joi.object().keys({
     name: Joi.string(),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
+  }),
+};
+
+const renameFolder = {
+  params: Joi.object().keys({
+    folderId: Joi.string().required().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    name: Joi.string().required(),
   }),
 };
 
@@ -58,4 +73,6 @@ module.exports = {
   updateFolder,
   deleteFolder,
   getUserFolders,
+  reorderFolders,
+  renameFolder,
 };

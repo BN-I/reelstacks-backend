@@ -6,6 +6,7 @@ const docsRoute = require('./docs.route');
 const notificationSettingRoute = require('./notificationSetting.route');
 
 const supportRequestRoute = require('./supportRequest.route');
+const feedbackRoute = require('./feedback.route');
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -14,6 +15,10 @@ const defaultRoutes = [
   {
     path: '/support-requests',
     route: supportRequestRoute,
+  },
+  {
+    path: '/feedback',
+    route: feedbackRoute,
   },
   {
     path: '/notification-settings',

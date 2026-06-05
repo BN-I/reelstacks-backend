@@ -46,7 +46,7 @@ const deleteFolder = catchAsync(async (req, res) => {
 const getUserFolders = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['name']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  if (!options.sortBy) options.sortBy = 'createdAt:desc';
+  if (!options.sortBy) options.sortBy = 'sort:asc,createdAt:asc';
   console.log(req.query);
   if (filter.name) {
     filter.name = {
@@ -80,6 +80,24 @@ const getAllUserFolders = catchAsync(async (req, res) => {
   res.send(folders);
 });
 
+const reorderFolders = catchAsync(async (req, res) => {
+  await folderService.reorderFolders(req.user._id, req.body.folderIds);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const renameFolder = catchAsync(async (req, res) => {
+  const folder = await folderService.getFolderById(req.params.folderId);
+  if (!folder) {
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Folder not found' });
+  }
+  if (folder.user.toString() !== req.user._id.toString()) {
+    return res.status(httpStatus.FORBIDDEN).send({ message: 'Forbidden' });
+  }
+  folder.name = req.body.name;
+  await folder.save();
+  res.send(folder);
+});
+
 module.exports = {
   createFolder,
   getFolders,
@@ -88,4 +106,6 @@ module.exports = {
   deleteFolder,
   getUserFolders,
   getAllUserFolders,
+  reorderFolders,
+  renameFolder,
 };

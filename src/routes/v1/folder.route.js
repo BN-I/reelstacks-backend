@@ -13,6 +13,8 @@ router
 
 router.route('/me').get(auth('getMyFolders'), validate(folderValidation.getUserFolders), folderController.getUserFolders);
 router.route('/me/all').get(auth('getMyFolders'), folderController.getAllUserFolders);
+router.route('/me/reorder').patch(auth('manageFolders'), validate(folderValidation.reorderFolders), folderController.reorderFolders);
+router.route('/me/:folderId/rename').patch(auth('manageFolders'), validate(folderValidation.renameFolder), folderController.renameFolder);
 
 router
   .route('/:folderId')

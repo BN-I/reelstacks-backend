@@ -54,7 +54,17 @@ const getUserFolders = async (filter = {}, options = {}) => {
 };
 
 const getAllUserFolders = async (filter = {}) => {
-  return Folder.find(filter).select('id name user').sort({ createdAt: -1 });
+  return Folder.find(filter).select('id name user sort').sort({ sort: 1, createdAt: 1 });
+};
+
+const reorderFolders = async (userId, folderIds) => {
+  const bulkOps = folderIds.map((id, index) => ({
+    updateOne: {
+      filter: { _id: id, user: userId },
+      update: { $set: { sort: index } },
+    },
+  }));
+  await Folder.bulkWrite(bulkOps);
 };
 
 module.exports = {
@@ -65,4 +75,5 @@ module.exports = {
   deleteFolderById,
   getUserFolders,
   getAllUserFolders,
+  reorderFolders,
 };
