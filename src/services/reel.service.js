@@ -3,7 +3,7 @@ const { Reel } = require('../models');
 const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
 const s3Service = require('./s3.service');
-const { fetchOGMetaTags } = require('../utils/ogMetaTags');
+const { fetchOGMetaTags, getDomainFallbackMeta } = require('../utils/ogMetaTags');
 const { downloadImage, generateFileName } = require('../utils/imageDownloader');
 const { default: axios } = require('axios');
 const https = require('https');
@@ -17,6 +17,12 @@ const fetchMetaWithPuppeteer = async (url, folder) => {
     ogTags = await fetchOGMetaTags(url);
   } catch (err) {
     logger.warn(`Puppeteer OG fetch failed for ${url}: ${err.message}`);
+  }
+
+  // If page-level OG tags are unavailable (private/ad/blocked), fall back to domain branding
+  if (!ogTags.thumbnail) {
+    logger.warn(`Falling back to domain branding for ${url}`);
+    ogTags = getDomainFallbackMeta(url);
   }
 
   let imageUrl = FALLBACK_IMAGE;

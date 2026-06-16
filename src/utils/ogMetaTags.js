@@ -1,7 +1,3 @@
-const https = require('https');
-const http = require('http');
-const logger = require('../config/logger');
-const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
 
 /**
@@ -92,6 +88,19 @@ const parseMetaTags = (htmlData) => {
   return metaTags;
 };
 
+const getDomainFallbackMeta = (url) => {
+  const { hostname } = new URL(url);
+  const domain = hostname.replace(/^www\./, '');
+  const brandName = domain.split('.')[0];
+  const title = brandName.charAt(0).toUpperCase() + brandName.slice(1);
+  return {
+    title,
+    description: domain,
+    thumbnail: `https://www.google.com/s2/favicons?domain=${domain}&sz=256`,
+  };
+};
+
 module.exports = {
   fetchOGMetaTags,
+  getDomainFallbackMeta,
 };
